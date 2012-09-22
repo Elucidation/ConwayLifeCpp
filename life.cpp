@@ -1,8 +1,10 @@
 #include <iostream>	
 #include <stdlib.h>
+#include <time.h>
 using namespace std;
 
-#define SIZE 32
+#define SIZE 1024
+#define FRAMERATE 25
 
 class Life
 {
@@ -90,17 +92,24 @@ int Life::neighbors(int x, int y) {
 
 int main(int argc, char const *argv[])
 {
-	int seed = 235;//time(NULL);
+	int seed = time(NULL);
+	int turns = 10;
+	float dt = 1.0/FRAMERATE * 1000; // frames/sec -> ms per step
 	srand(seed);
 	cout << "SEED: " << seed << endl;
-	cout << "Life" << endl;
+	cout << "Life, DT: "<< dt << "ms per turn, for " << turns << " turns." << endl;
 	Life x;
-	x.print();
-	for (int i = 1; i <= 10; ++i)
+	long t = clock();
+	long tstepStart;
+	float tstep;
+	for (int i = 1; i <= turns; ++i)
 	{
 		cout << "Step " << i <<  endl;	
+		tstepStart = clock();
 		x.step();
-		x.print();
+		tstep = (float)(clock()-tstepStart)/CLOCKS_PER_SEC;
+		//x.print();
+		cout << "Step took: " << tstep << " seconds." << endl;
 	}
 	
 
