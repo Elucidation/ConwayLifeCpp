@@ -117,7 +117,12 @@ int Life::neighbors(int x, int y) {
 int main(int argc, char const *argv[])
 {
 	int seed = time(NULL);
-	int size = 64;	
+	int size = 64;
+	if (argc > 1) {
+		size = atoi(argv[1]); // C++ 11 has stoi, but not this compiler apparently
+		if (size < 0)
+			size = 0;
+	}
 	int turns = 10;
 	float dt = 1.0/FRAMERATE * 1000; // frames/sec -> ms per step
 	srand(seed);
@@ -125,16 +130,19 @@ int main(int argc, char const *argv[])
 	cout << "Life("<<size<<"), DT: "<< dt << "ms per turn, for " << turns << " turns." << endl;
 	Life x(size);
 	long t = clock();
-	long tstepStart;
+	int tStart;
+	int tstepStart;
 	float tstep;
 	for (int i = 1; i <= turns; ++i)
 	{
 		cout << "Step " << i <<  endl;	
+		tStart = clock();
 		tstepStart = clock();
 		x.step();
 		tstep = (float)(clock()-tstepStart)/CLOCKS_PER_SEC;
 		//x.print();
 		cout << "Step took: " << tstep << " seconds." << endl;
+		while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {};
 	}
 	
 
