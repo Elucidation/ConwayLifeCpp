@@ -5,7 +5,7 @@
 #include <windows.h>
 using namespace std;
 
-#define FRAMERATE 2
+#define FRAMERATE 25
 
 class Life
 {
@@ -68,17 +68,24 @@ Life::~Life() {
 }
 
 void Life::print() {
-	for (int i = 0; i < size; ++i)
+	for (int i=0;i<size;++i)
+		cout << "X";
+	cout << endl;
+	for (int i = 1; i < size-1; ++i)
 	{
-		for (int j = 0; j < size; ++j)
+		cout <<"X";
+		for (int j = 1; j < size-1; ++j)
 		{
 			if (world[i][j])
 				cout << "#";
 			else
-				cout << "-";
+				cout << " ";
 		}
-		cout << endl;
+		cout << "X"<< endl;
 	}
+	for (int i=0;i<size;++i)
+		cout << "X";
+	cout << endl;
 }
 
 void Life::step() {
@@ -118,8 +125,8 @@ int Life::neighbors(int x, int y) {
 int main(int argc, char const *argv[])
 {
 	int seed = time(NULL);
-	int size = 64;
-	int turns = 10;
+	int size = 32;
+	int turns = 100;
 	if (argc > 1) {
 		size = atoi(argv[1]); // C++ 11 has stoi, but not this compiler apparently
 		if (size < 0)
@@ -152,7 +159,7 @@ int main(int argc, char const *argv[])
 		x.step();
 		tstep = (float)(clock()-tstepStart)/CLOCKS_PER_SEC;
 		x.print();
-		cout << "Step took: " << tstep << " seconds." << endl;
+		cout << "Step time (sec): " << tstep << "              " << endl;
 		while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {};
 	}
 	
