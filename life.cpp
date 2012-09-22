@@ -2,9 +2,10 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string>
+#include <windows.h>
 using namespace std;
 
-#define FRAMERATE 25
+#define FRAMERATE 2
 
 class Life
 {
@@ -118,14 +119,22 @@ int main(int argc, char const *argv[])
 {
 	int seed = time(NULL);
 	int size = 64;
+	int turns = 10;
 	if (argc > 1) {
 		size = atoi(argv[1]); // C++ 11 has stoi, but not this compiler apparently
 		if (size < 0)
 			size = 0;
+		if (argc > 2) {
+			turns = atoi(argv[2]); // C++ 11 has stoi, but not this compiler apparently
+			if (turns < 0)
+				turns = 0;
+		}
 	}
-	int turns = 10;
 	float dt = 1.0/FRAMERATE * 1000; // frames/sec -> ms per step
 	srand(seed);
+	COORD cur1 = {0, 0};
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur1);
+	system("cls");
 	cout << "SEED: " << seed << endl;
 	cout << "Life("<<size<<"), DT: "<< dt << "ms per turn, for " << turns << " turns." << endl;
 	Life x(size);
@@ -133,14 +142,16 @@ int main(int argc, char const *argv[])
 	int tStart;
 	int tstepStart;
 	float tstep;
+	COORD cur = {0, 2};
 	for (int i = 1; i <= turns; ++i)
 	{
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
 		cout << "Step " << i <<  endl;	
 		tStart = clock();
 		tstepStart = clock();
 		x.step();
 		tstep = (float)(clock()-tstepStart)/CLOCKS_PER_SEC;
-		//x.print();
+		x.print();
 		cout << "Step took: " << tstep << " seconds." << endl;
 		while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {};
 	}
