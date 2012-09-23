@@ -6,6 +6,7 @@
 using namespace std;
 
 #define FRAMERATE 25
+//#define DO_VISUALS
 
 class Life
 {
@@ -139,34 +140,38 @@ int main(int argc, char const *argv[])
 	}
 	float dt = 1.0/FRAMERATE * 1000; // frames/sec -> ms per step
 	srand(seed);
+	Life x(size);
+
+#ifdef DO_VISUALS
 	COORD cur1 = {0, 0};
+	COORD cur = {0, 2};
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur1);
 	system("cls");
 	cout << "SEED: " << seed << endl;
 	cout << "Life("<<size<<"), DT: "<< dt << "ms per turn, for " << turns << " turns." << endl;
-	Life x(size);
+	x.print();
+#endif
+	
 	long t = clock();
 	int tStart;
 	int tstepStart;
-	float tstep;
+	int tstep;
 	float stepTimes = 0;
-	COORD cur = {0, 2};
 	for (int i = 1; i <= turns; ++i)
 	{
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
-		cout << "Step " << i <<  endl;	
 		tStart = clock();
 		tstepStart = clock();
 		x.step();
 		tstep = clock()-tstepStart; // clicks
 		stepTimes += tstep; // clicks
-		x.print();
+#ifdef DO_VISUALS
 		cout << "Step " << i << ": Step time (ms): " << (float)tstep/(CLOCKS_PER_SEC/1000) << "              " << endl;
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
+		x.print();
 		while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {};
+#endif
 	}
 	stepTimes /= turns;
-	cout << "Avg Step Time: (" << (float)stepTimes/CLOCKS_PER_SEC*1000 << ") ms                " << endl;
-
-	cout << "Done" << endl;	
+	cout << "Avg Step Time: (" << stepTimes/CLOCKS_PER_SEC*1000 << ") ms                " << endl;
 	return 0;
 }
