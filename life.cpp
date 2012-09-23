@@ -149,6 +149,7 @@ int main(int argc, char const *argv[])
 	int tStart;
 	int tstepStart;
 	float tstep;
+	float stepTimes = 0;
 	COORD cur = {0, 2};
 	for (int i = 1; i <= turns; ++i)
 	{
@@ -157,12 +158,14 @@ int main(int argc, char const *argv[])
 		tStart = clock();
 		tstepStart = clock();
 		x.step();
-		tstep = (float)(clock()-tstepStart)/CLOCKS_PER_SEC;
+		tstep = clock()-tstepStart; // clicks
+		stepTimes += tstep; // clicks
 		x.print();
-		cout << "Step time (sec): " << tstep << "              " << endl;
+		cout << "Step " << i << ": Step time (ms): " << (float)tstep/(CLOCKS_PER_SEC/1000) << "              " << endl;
 		while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {};
 	}
-	
+	stepTimes /= turns;
+	cout << "Avg Step Time: (" << (float)stepTimes/CLOCKS_PER_SEC*1000 << ") ms                " << endl;
 
 	cout << "Done" << endl;	
 	return 0;
