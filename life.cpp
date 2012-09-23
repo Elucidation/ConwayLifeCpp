@@ -28,21 +28,13 @@ public:
 Life::Life(int size_in) {
 	size = size_in;
 
-	world = (bool**)malloc(sizeof(bool*) * size);
-	if (world)
-		for (int i = 0; i < size; ++i)
-			world[i] = (bool*)malloc(sizeof(bool*) * size);
+	if ( (world = (bool**)malloc(sizeof(bool*) * size)) == NULL ) exit(-1);
+	for (int i = 0; i < size; ++i)
+		if ( (world[i] = (bool*)malloc(sizeof(bool*) * size)) == NULL ) exit(-1);
 		
-	next = (bool**)malloc(sizeof(bool*) * size);
-	if (next)
-		for (int i = 0; i < size; ++i)
-			next[i] = (bool*)malloc(sizeof(bool*) * size);
-	
-	if (world == NULL || next == NULL) {
-		cout << "Malloc failed." <<endl;
-		return;
-	}
-	
+	if ( (next = (bool**)malloc(sizeof(bool*) * size)) == NULL ) exit(-1);
+	for (int i = 0; i < size; ++i)
+		if ( (next[i] = (bool*)malloc(sizeof(bool*) * size)) == NULL ) exit(-1);	
 
 	steps = 0;
 	for (int i = 0; i < size-1; ++i)
