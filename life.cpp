@@ -10,9 +10,10 @@ using namespace std;
 
 class Life
 {
-	bool **world; // pointer to pointer
-	bool **next;
-	int steps;
+	bool **world; // 2d square array (ptr->ptr)
+	bool **next; // next step storage
+	int steps; // # of steps run counter
+	int size; // 2d square array of size array[size][size] (includes boundaries)
 public:
 	Life(int size_in);
 	~Life();
@@ -20,7 +21,6 @@ public:
 	void step();
 	bool checkLife(int x, int y);
 	int neighbors(int x, int y);
-	int size;
 
 	void print();
 };
@@ -47,20 +47,21 @@ Life::Life(int size_in) {
 	}
 
 	for (int i = 1; i < size-1; ++i)
-	{
-		for (int j = 1; j < size-1; ++j) {
+		for (int j = 1; j < size-1; ++j)
 			world[i][j] = ((float)rand() / RAND_MAX > 0.5) ? true : false;
-
-		}
-	}
 }
 
 Life::~Life() {
+	for (int i = 0; i < size; ++i) {
+		free( world[i] );
+		free( next[i] );
+	}
 	free(world);
 	free(next);
 }
 
 void Life::print() {
+	// Draw to screen ,boundarys as X
 	for (int i=0;i<size;++i)
 		cout << "X";
 	cout << endl;
@@ -98,43 +99,47 @@ void Life::step() {
 bool Life::checkLife(int x, int y) {
 	bool c = world[x][y]; // cell
 	int n = neighbors(x,y); // neighbors
-	if (n==3 || (world[x][y] && n==2))
-		return true;
-	else
-		return false;
+	return n==3 || (world[x][y] && n==2);
 }
 
 int Life::neighbors(int x, int y) {
 	int sum = world[x][y] ? -1 : 0;
-	for (int i = x-1; i < x+2; ++i) {
-		for (int j = y-1; j < y+2; ++j) {
+	for (int i = x-1; i < x+2; ++i)
+		for (int j = y-1; j < y+2; ++j)
 			if (world[i][j])
 				sum++;
-		}
-	}
 	return sum;
 }
 
 int main(int argc, char const *argv[])
 {
+	// Defaults
 	int seed = time(NULL);
 	int size = 32;
 	int turns = 100;
+
+	srand(seed);
+
+	// Passed in arguments
 	if (argc > 1) {
 		size = atoi(argv[1]); // C++ 11 has stoi, but not this compiler apparently
 		if (size < 0)
 			size = 0;
 		if (argc > 2) {
-			turns = atoi(argv[2]); // C++ 11 has stoi, but not this compiler apparently
+			turns = atoi(argv[2]);
 			if (turns < 0)
 				turns = 0;
 		}
 	}
-	float dt = 1.0/FRAMERATE * 1000; // frames/sec -> ms per step
-	srand(seed);
+
+	// Create world
 	Life x(size);
 
 #ifdef DO_VISUALS
+	// Step rate in ms (only used if displaying)
+	float dt = 1.0/FRAMERATE * 1000; // frames/sec -> ms per step
+
+	// Used for cursor positioning on visualization
 	COORD cur1 = {0, 0};
 	COORD cur = {0, 2};
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur1);
@@ -157,13 +162,13 @@ int main(int argc, char const *argv[])
 		tstep = clock()-tstepStart; // clicks
 		stepTimes += tstep; // clicks
 #ifdef DO_VISUALS
-		cout << "Step " << i << ": Step time (ms): " << (float)tstep/(CLOCKS_PER_SEC/1000) << "              " << endl;
+		cout << "Step " << i << ": Step time: " << (float)tstep/(CLOCKS_PER_SEC/1000) << " ms             " << endl;
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
 		x.print();
-		while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {};
+		while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {}; // Delay to framerate
 #endif
 	}
 	stepTimes /= turns;
-	cout << "Avg Step Time: (" << stepTimes/CLOCKS_PER_SEC*1000 << ") ms                " << endl;
+	cout << endl << endl << "Avg Step Time: " << stepTimes/CLOCKS_PER_SEC*1000 << " ms                " << endl;
 	return 0;
 }
