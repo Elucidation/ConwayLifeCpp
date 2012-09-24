@@ -6,6 +6,7 @@
 using namespace std;
 
 #define FRAMERATE 25
+#define VISUAL "v" // The string literal to pass as argument to enable visualization (if disabled)
 //#define DO_VISUALS
 
 class Life
@@ -113,10 +114,13 @@ int Life::neighbors(int x, int y) {
 
 int main(int argc, char const *argv[])
 {
+	// Arguments argv[]: life.exe SIZE TURNS VISUAL?
+	// For example, from terminal, enter: life.exe 20 500 v to run a 20x20 life for 500 turns with visuals on
 	// Defaults
 	int seed = time(NULL);
 	int size = 32;
 	int turns = 100;
+	bool do_visuals = true;
 
 	srand(seed);
 
@@ -129,25 +133,28 @@ int main(int argc, char const *argv[])
 			turns = atoi(argv[2]);
 			if (turns < 0)
 				turns = 0;
+			if (argc > 3)
+				do_visuals = strcmp(VISUAL,argv[3]) == 0;
 		}
 	}
 
 	// Create world
 	Life x(size);
 
-#ifdef DO_VISUALS
-	// Step rate in ms (only used if displaying)
-	float dt = 1.0/FRAMERATE * 1000; // frames/sec -> ms per step
-
 	// Used for cursor positioning on visualization
 	COORD cur1 = {0, 0};
 	COORD cur = {0, 2};
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur1);
-	system("cls");
-	cout << "SEED: " << seed << endl;
-	cout << "Life("<<size<<"), DT: "<< dt << "ms per turn, for " << turns << " turns." << endl;
-	x.print();
-#endif
+	// Step rate in ms (only used if displaying)
+	float dt;
+
+	if (do_visuals) {
+		dt = 1.0/FRAMERATE * 1000; // frames/sec -> ms per step
+		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur1);
+		system("cls");
+		cout << "SEED: " << seed << endl;
+		cout << "Life("<<size<<"), DT: "<< dt << "ms per turn, for " << turns << " turns." << endl;
+		x.print();
+	}
 	
 	long t = clock();
 	int tStart;
@@ -161,12 +168,12 @@ int main(int argc, char const *argv[])
 		x.step();
 		tstep = clock()-tstepStart; // clicks
 		stepTimes += tstep; // clicks
-#ifdef DO_VISUALS
-		cout << "Step " << i << ": Step time: " << (float)tstep/(CLOCKS_PER_SEC/1000) << " ms             " << endl;
-		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
-		x.print();
-		while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {}; // Delay to framerate
-#endif
+		if (do_visuals) {
+			cout << "Step " << i << ": Step time: " << (float)tstep/(CLOCKS_PER_SEC/1000) << " ms             " << endl;
+			SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cur);
+			x.print();
+			while ((float)(clock()-tStart)/CLOCKS_PER_SEC*1000 < dt) {}; // Delay to framerate
+		}
 	}
 	stepTimes /= turns;
 	cout << endl << endl << "Avg Step Time: " << stepTimes/CLOCKS_PER_SEC*1000 << " ms                " << endl;
